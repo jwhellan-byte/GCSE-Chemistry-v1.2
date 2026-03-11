@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>AQA GCSE Chemistry Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #991b1b;
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #991b1b;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f1d1d;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            background: #fee2e2;
+            border-radius: 12px;
+            height: 24px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-primary {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: #b91c1c;
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+
+        .btn-secondary:active {
+            background: #fee2e2;
+            transform: scale(0.98);
+        }
+
+        .topic {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .topic-header {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .topic-header:active {
+            background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+        }
+
+        .topic-title {
+            font-size: 16px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .topic-stats {
+            font-size: 13px;
+            margin-right: 12px;
+            opacity: 0.95;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+            font-size: 20px;
+        }
+
+        .topic.expanded .chevron {
+            transform: rotate(180deg);
+        }
+
+        .topic-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .topic.expanded .topic-content {
+            max-height: 10000px;
+        }
+
+        .statement-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #fee2e2;
+        }
+
+        .statement-item:last-child {
+            border-bottom: none;
+        }
+
+        .statement-text {
+            font-size: 15px;
+            color: #1f2937;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-btn:active {
+            transform: scale(0.97);
+        }
+
+        .status-btn.complete {
+            background: #dcfce7;
+            border-color: #16a34a;
+            color: #15803d;
+        }
+
+        .status-btn.practice {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #d97706;
+        }
+
+        .status-btn.review {
+            background: #fee2e2;
+            border-color: #dc2626;
+            color: #b91c1c;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+                padding-bottom: 70px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                gap: 8px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .topic-title {
+                font-size: 15px;
+            }
+
+            .statement-text {
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AQA GCSE Chemistry Tracker</h1>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" id="completeCount">0</span>
+                    <span class="stat-label">Complete ✅</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="practiceCount">0</span>
+                    <span class="stat-label">Practice ⚠️</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="reviewCount">0</span>
+                    <span class="stat-label">Review ❌</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="notStartedCount">0</span>
+                    <span class="stat-label">Not Started</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" onclick="toggleAll()">Expand All</button>
+                <button class="btn btn-secondary" onclick="exportProgress()">Export Progress</button>
+                <button class="btn btn-secondary" onclick="resetProgress()">Reset All</button>
+            </div>
+        </div>
+
+        <div id="topics"></div>
+    </div>
+
+    <script>
+        const topics = [
+            {
+                name: "Topic 1: Atomic Structure and the Periodic Table",
+                statements: [
+                    "I can describe the structure of an atom including protons, neutrons and electrons",
+                    "I can recall the relative masses and charges of protons, neutrons and electrons",
+                    "I can calculate the number of protons, neutrons and electrons in atoms and ions",
+                    "I understand how the periodic table is organised by atomic number",
+                    "I can explain why elements in the same group have similar properties",
+                    "I can describe the development of the atomic model from Dalton to Bohr",
+                    "I can explain the significance of the alpha particle scattering experiment",
+                    "I can calculate relative atomic mass from isotopic abundances",
+                    "I can write electron configurations for the first 20 elements",
+                    "I can describe the development of Mendeleev's periodic table",
+                    "I can explain why Mendeleev left gaps in his periodic table",
+                    "I can explain the difference between metals and non-metals based on their properties",
+                    "I can describe the properties of Group 0 noble gases",
+                    "I can explain why noble gases are unreactive",
+                    "I can describe the reactions of Group 1 alkali metals with water, oxygen and chlorine",
+                    "I can explain the reactivity trend in Group 1",
+                    "I can describe the properties and reactions of Group 7 halogens",
+                    "I can explain the reactivity trend in Group 7",
+                    "I can describe displacement reactions of halogens",
+                    "I can describe the properties of transition metals compared to Group 1 metals"
+                ]
+            },
+            {
+                name: "Topic 2: Bonding, Structure and Properties of Matter",
+                statements: [
+                    "I can describe the three types of strong chemical bonds: ionic, covalent and metallic",
+                    "I can explain ionic bonding in terms of electron transfer and electrostatic attraction",
+                    "I can draw dot and cross diagrams for ionic compounds",
+                    "I can work out the charge on ions from the group number",
+                    "I can work out the empirical formula of ionic compounds from diagrams",
+                    "I can explain the properties of ionic compounds",
+                    "I can describe covalent bonding as the sharing of electron pairs",
+                    "I can draw dot and cross diagrams for simple covalent molecules",
+                    "I can represent covalent bonds using displayed formulae",
+                    "I can explain the properties of small covalent molecules",
+                    "I can describe metallic bonding including delocalised electrons",
+                    "I can explain the properties of metals including conductivity",
+                    "I can explain why alloys are harder than pure metals",
+                    "I can describe the structure and properties of diamond",
+                    "I can describe the structure and properties of graphite",
+                    "I can describe the structure and properties of graphene and fullerenes",
+                    "I can explain the three states of matter using particle theory",
+                    "I can predict state changes at different temperatures",
+                    "I can explain limitations of the simple particle model",
+                    "I can calculate surface area to volume ratios for nanoparticles",
+                    "I can describe uses and risks of nanoparticles"
+                ]
+            },
+            {
+                name: "Topic 3: Quantitative Chemistry",
+                statements: [
+                    "I can state the law of conservation of mass",
+                    "I can write balanced symbol equations",
+                    "I can calculate relative formula mass (Mr)",
+                    "I can calculate percentage by mass in a compound",
+                    "I can explain mass changes when gases are involved in reactions",
+                    "I understand uncertainty in measurements",
+                    "I can calculate the number of moles from mass (HT)",
+                    "I can use the Avogadro constant (HT)",
+                    "I can calculate masses from balanced equations (HT)",
+                    "I can balance equations using moles (HT)",
+                    "I can identify limiting reactants (HT)",
+                    "I can calculate concentration in g/dm³",
+                    "I can calculate concentration in mol/dm³ (HT)",
+                    "I can calculate percentage yield",
+                    "I can calculate theoretical mass of products (HT)",
+                    "I can calculate atom economy",
+                    "I can explain why certain reaction pathways are chosen (HT)",
+                    "I can calculate volumes of gases at RTP (HT)",
+                    "I can calculate volumes of gaseous products from equations (HT)"
+                ]
+            },
+            {
+                name: "Topic 4: Chemical Changes",
+                statements: [
+                    "I can define oxidation and reduction in terms of oxygen",
+                    "I can describe the reactivity series of metals",
+                    "I can predict reactions of metals with water and acids",
+                    "I can explain reactivity in terms of tendency to form positive ions",
+                    "I can describe displacement reactions of metals",
+                    "I can explain metal extraction by reduction with carbon",
+                    "I can define oxidation and reduction in terms of electrons (HT)",
+                    "I can write ionic equations for displacement reactions (HT)",
+                    "I can describe reactions of acids with metals to produce salts and hydrogen",
+                    "I can describe neutralisation reactions to produce salts",
+                    "I can predict the salt produced from given reactants",
+                    "I can describe how to make pure, dry samples of soluble salts",
+                    "I can explain the pH scale and what pH values mean",
+                    "I can write the ionic equation for neutralisation",
+                    "I can describe how to carry out titrations",
+                    "I can calculate concentrations from titration results (HT)",
+                    "I can explain the difference between strong and weak acids (HT)",
+                    "I can explain the relationship between pH and H⁺ concentration (HT)",
+                    "I can describe the process of electrolysis",
+                    "I can predict products of electrolysis of molten ionic compounds",
+                    "I can explain the extraction of aluminium by electrolysis",
+                    "I can predict products of electrolysis of aqueous solutions",
+                    "I can write half equations for electrode reactions (HT)"
+                ]
+            },
+            {
+                name: "Topic 5: Energy Changes",
+                statements: [
+                    "I can distinguish between exothermic and endothermic reactions",
+                    "I can give examples and uses of exothermic reactions",
+                    "I can give examples and uses of endothermic reactions",
+                    "I can draw and interpret reaction profiles for exothermic reactions",
+                    "I can draw and interpret reaction profiles for endothermic reactions",
+                    "I can explain what activation energy is",
+                    "I can explain energy changes in terms of bond breaking and making (HT)",
+                    "I can calculate energy changes using bond energies (HT)",
+                    "I can describe how simple cells produce electricity",
+                    "I can explain what affects the voltage of a cell",
+                    "I can describe the difference between rechargeable and non-rechargeable batteries",
+                    "I can describe how hydrogen fuel cells work",
+                    "I can evaluate the use of hydrogen fuel cells",
+                    "I can write half equations for hydrogen fuel cells (HT)"
+                ]
+            },
+            {
+                name: "Topic 6: Rate and Extent of Chemical Change",
+                statements: [
+                    "I can calculate mean rate of reaction from mass or volume measurements",
+                    "I can draw and interpret graphs of quantity against time",
+                    "I can calculate rate from the gradient of a tangent (HT)",
+                    "I can describe factors that affect rates of reaction",
+                    "I can explain collision theory",
+                    "I can explain how concentration affects rate using collision theory",
+                    "I can explain how pressure affects rate using collision theory",
+                    "I can explain how surface area affects rate using collision theory",
+                    "I can explain how temperature affects rate using collision theory",
+                    "I can explain how catalysts increase rate of reaction",
+                    "I can draw reaction profiles showing the effect of catalysts",
+                    "I can describe what a reversible reaction is",
+                    "I can explain energy changes in reversible reactions",
+                    "I can explain what dynamic equilibrium means",
+                    "I can apply Le Chatelier's Principle (HT)",
+                    "I can predict the effect of concentration changes on equilibrium (HT)",
+                    "I can predict the effect of temperature changes on equilibrium (HT)",
+                    "I can predict the effect of pressure changes on equilibrium (HT)"
+                ]
+            },
+            {
+                name: "Topic 7: Organic Chemistry",
+                statements: [
+                    "I can describe crude oil as a mixture of hydrocarbons",
+                    "I can describe the general formula of alkanes (CnH2n+2)",
+                    "I can name and draw the first four alkanes",
+                    "I can explain how fractional distillation separates crude oil",
+                    "I can describe how properties of hydrocarbons change with molecular size",
+                    "I can write balanced equations for complete combustion of hydrocarbons",
+                    "I can describe cracking and explain why it is useful",
+                    "I can describe conditions for catalytic and steam cracking",
+                    "I can write balanced equations for cracking reactions",
+                    "I can describe the test for alkenes using bromine water",
+                    "I can describe the general formula of alkenes (CnH2n)",
+                    "I can name and draw the first four alkenes",
+                    "I can describe addition reactions of alkenes with hydrogen, water and halogens",
+                    "I can draw displayed formulae for products of alkene addition reactions",
+                    "I can describe reactions of alcohols with sodium, oxygen and water",
+                    "I can describe fermentation to produce ethanol",
+                    "I can name the first four alcohols and carboxylic acids",
+                    "I can describe reactions of carboxylic acids with carbonates and alcohols",
+                    "I can explain why carboxylic acids are weak acids (HT)",
+                    "I can describe addition polymerisation",
+                    "I can draw repeating units of addition polymers",
+                    "I can describe condensation polymerisation to form polyesters (HT)",
+                    "I can describe condensation polymerisation of amino acids (HT)",
+                    "I can describe the structure and function of DNA"
+                ]
+            },
+            {
+                name: "Topic 8: Chemical Analysis",
+                statements: [
+                    "I can explain what a pure substance is in chemistry",
+                    "I can use melting and boiling points to test purity",
+                    "I can describe what a formulation is and give examples",
+                    "I can explain how paper chromatography separates mixtures",
+                    "I can calculate Rf values from chromatograms",
+                    "I can interpret chromatograms",
+                    "I can describe the test for hydrogen",
+                    "I can describe the test for oxygen",
+                    "I can describe the test for carbon dioxide",
+                    "I can describe the test for chlorine",
+                    "I can describe flame tests for metal ions",
+                    "I can identify metal ions using flame tests",
+                    "I can describe tests for metal ions using sodium hydroxide",
+                    "I can write equations for the formation of metal hydroxide precipitates",
+                    "I can describe the test for carbonate ions",
+                    "I can describe the test for halide ions using silver nitrate",
+                    "I can describe the test for sulfate ions using barium chloride",
+                    "I can explain advantages of instrumental methods",
+                    "I can interpret flame emission spectroscopy results"
+                ]
+            },
+            {
+                name: "Topic 9: Chemistry of the Atmosphere",
+                statements: [
+                    "I can state the proportions of gases in today's atmosphere",
+                    "I can describe theories about the Earth's early atmosphere",
+                    "I can describe how the early atmosphere was formed by volcanic activity",
+                    "I can explain how oxygen levels increased due to photosynthesis",
+                    "I can explain how carbon dioxide levels decreased",
+                    "I can describe the formation of sedimentary rocks and fossil fuels",
+                    "I can describe the greenhouse effect",
+                    "I can name greenhouse gases including carbon dioxide, methane and water vapour",
+                    "I can describe human activities that increase greenhouse gases",
+                    "I can describe evidence for climate change",
+                    "I can evaluate the quality of evidence for climate change",
+                    "I can describe the carbon footprint of a product or activity",
+                    "I can explain why it is difficult to reduce carbon footprints",
+                    "I can describe atmospheric pollutants from fuels including carbon monoxide, sulfur dioxide and particulates",
+                    "I can explain the problems caused by these pollutants",
+                    "I can describe the formation and effects of acid rain"
+                ]
+            },
+            {
+                name: "Topic 10: Using Resources",
+                statements: [
+                    "I can explain what sustainable development means",
+                    "I can explain the difference between finite and renewable resources",
+                    "I can describe uses of water for agriculture, industry and domestic purposes",
+                    "I can describe the steps in treating water for drinking",
+                    "I can evaluate methods of desalination",
+                    "I can explain what is meant by waste water",
+                    "I can describe the steps in treating waste water",
+                    "I can describe methods of extracting metals from ores including reduction with carbon",
+                    "I can explain why new methods of extracting metals are being developed",
+                    "I can describe phytomining",
+                    "I can describe bioleaching",
+                    "I can evaluate alternative biological methods of metal extraction",
+                    "I can explain why recycling metals is important",
+                    "I can describe the principles of a Life Cycle Assessment (LCA)",
+                    "I can carry out a simple LCA",
+                    "I can evaluate ways of reducing the use of resources",
+                    "I can describe the composition of common alloys including steel, brass and bronze",
+                    "I can explain how the properties of polymers depend on their structure",
+                    "I can describe uses of ceramics, composites and polymers",
+                    "I can describe the Haber process for making ammonia",
+                    "I can explain the choice of conditions for the Haber process (HT)"
+                ]
+            }
+        ];
+
+        let progress = {};
+        let allExpanded = false;
+
+        function loadProgress() {
+            const saved = localStorage.getItem('aqaGCSEChemTracker');
+            if (saved) {
+                progress = JSON.parse(saved);
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('aqaGCSEChemTracker', JSON.stringify(progress));
+        }
+
+        function renderTopics() {
+            const container = document.getElementById('topics');
+            container.innerHTML = '';
+
+            topics.forEach((topic, topicIndex) => {
+                const topicDiv = document.createElement('div');
+                topicDiv.className = 'topic';
+                
+                const stats = getTopicStats(topicIndex);
+                
+                topicDiv.innerHTML = `
+                    <div class="topic-header" onclick="toggleTopic(${topicIndex})">
+                        <div class="topic-title">${topic.name}</div>
+                        <div class="topic-stats">${stats.complete}/${topic.statements.length}</div>
+                        <div class="chevron">▼</div>
+                    </div>
+                    <div class="topic-content">
+                        ${topic.statements.map((statement, stmtIndex) => `
+                            <div class="statement-item">
+                                <div class="statement-text">${statement}</div>
+                                <div class="button-group">
+                                    <button class="status-btn ${getStatus(topicIndex, stmtIndex) === 'complete' ? 'complete' : ''}" 
+                                            onclick="setStatus(${topicIndex}, ${stmtIndex}, 'complete', event)">
+                                        ✅ Complete
+                                    </button>
+                                    <button class="status-btn ${getStatus(topicIndex, stmtIndex) === 'practice' ? 'practice' : ''}" 
+                                            onclick="setStatus(${topicIndex}, ${stmtIndex}, 'practice', event)">
+                                        ⚠️ Practice
+                                    </button>
+                                    <button class="status-btn ${getStatus(topicIndex, stmtIndex) === 'review' ? 'review' : ''}" 
+                                            onclick="setStatus(${topicIndex}, ${stmtIndex}, 'review', event)">
+                                        ❌ Review
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(topicDiv);
+            });
+
+            updateStats();
+        }
+
+        function getStatus(topicIndex, stmtIndex) {
+            const key = `${topicIndex}-${stmtIndex}`;
+            return progress[key] || 'not-started';
+        }
+
+        function setStatus(topicIndex, stmtIndex, status, event) {
+            event.stopPropagation();
+            
+            const key = `${topicIndex}-${stmtIndex}`;
+            const currentStatus = progress[key];
+            
+            if (currentStatus === status) {
+                delete progress[key];
+            } else {
+                progress[key] = status;
+            }
+            
+            saveProgress();
+            
+            // Re-render but maintain expanded state
+            const expandedTopics = Array.from(document.querySelectorAll('.topic.expanded')).map(
+                (topic, idx) => Array.from(document.querySelectorAll('.topic')).indexOf(topic)
+            );
+            
+            renderTopics();
+            
+            // Restore expanded state
+            expandedTopics.forEach(idx => {
+                const topics = document.querySelectorAll('.topic');
+                if (topics[idx]) {
+                    topics[idx].classList.add('expanded');
+                }
+            });
+        }
+
+        function getTopicStats(topicIndex) {
+            const topic = topics[topicIndex];
+            let complete = 0;
+            
+            topic.statements.forEach((_, stmtIndex) => {
+                if (getStatus(topicIndex, stmtIndex) === 'complete') {
+                    complete++;
+                }
+            });
+            
+            return { complete, total: topic.statements.length };
+        }
+
+        function updateStats() {
+            let complete = 0, practice = 0, review = 0, notStarted = 0;
+            let totalStatements = 0;
+
+            topics.forEach((topic, topicIndex) => {
+                totalStatements += topic.statements.length;
+                topic.statements.forEach((_, stmtIndex) => {
+                    const status = getStatus(topicIndex, stmtIndex);
+                    if (status === 'complete') complete++;
+                    else if (status === 'practice') practice++;
+                    else if (status === 'review') review++;
+                    else notStarted++;
+                });
+            });
+
+            document.getElementById('completeCount').textContent = complete;
+            document.getElementById('practiceCount').textContent = practice;
+            document.getElementById('reviewCount').textContent = review;
+            document.getElementById('notStartedCount').textContent = notStarted;
+
+            const percentage = Math.round((complete / totalStatements) * 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        function toggleTopic(topicIndex) {
+            const topics = document.querySelectorAll('.topic');
+            topics[topicIndex].classList.toggle('expanded');
+        }
+
+        function toggleAll() {
+            allExpanded = !allExpanded;
+            const topics = document.querySelectorAll('.topic');
+            topics.forEach(topic => {
+                if (allExpanded) {
+                    topic.classList.add('expanded');
+                } else {
+                    topic.classList.remove('expanded');
+                }
+            });
+            
+            const btn = event.target;
+            btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(progress, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'aqa-gcse-chemistry-progress.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                progress = {};
+                saveProgress();
+                renderTopics();
+            }
+        }
+
+        loadProgress();
+        renderTopics();
+    </script>
+</body>
+</html>
